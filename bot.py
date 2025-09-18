@@ -11,7 +11,7 @@ from telegram.ext import (
 
 # 🔐 Lista de administradores autorizados (definidos manualmente)
 ADMINS_AUTORIZADOS = [
-    123456789,  # Substitua com seu ID real
+    7477496964,  # Substitua com seu ID real
     987654321,  # Outro admin
 ]
 
