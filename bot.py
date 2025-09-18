@@ -1,4 +1,5 @@
 import os
+import asyncio
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     ApplicationBuilder,
@@ -14,8 +15,14 @@ from handlers.novo_quiz import (
     tratar_resposta_quiz,
     tratar_callback_quiz
 )
+from handlers.iniciar_quiz import iniciar_quiz_handler
+from dotenv import load_dotenv
 
-# 🔐 Lista de administradores autorizados
+# 🔐 Carrega variáveis do .env
+load_dotenv()
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+
+# 🔐 Lista de administradores autorizados (privado)
 ADMINS_AUTORIZADOS = [
     7477496964,  # Patrick
     5489033929   # Outro admin
@@ -39,59 +46,20 @@ async def grupo_mencao_handler(update: Update, context: ContextTypes.DEFAULT_TYP
         if await is_admin(update, context):
             await enviar_menu_privado(update, context)
 
-# 📬 Envia o menu privado com botões inline
-async def enviar_menu_privado(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    keyboard = [
-        [InlineKeyboardButton("🆕 Novo Quiz", callback_data='novo_quiz')],
-        [InlineKeyboardButton("📁 Meus Quizzes", callback_data='meus_quizzes')],
-        [InlineKeyboardButton("📊 Estatísticas", callback_data='estatisticas')],
-        [InlineKeyboardButton("🛑 Parar Quiz", callback_data='parar_quiz')]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await context.bot.send_message(
-        chat_id=update.effective_user.id,
-        text="Olá, querido usuário! Escolha uma opção abaixo para comandar seus quizzes:",
-        reply_markup=reply_markup
-    )
-
-# 🎮 Handler para os botões do menu principal
-async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-    user_id = query.from_user.id
-
-    if not is_autorizado(user_id):
-        await query.edit_message_text("⚠️ Você não está autorizado a usar este menu.")
-        return
-
-    match query.data:
-        case 'novo_quiz':
-            await query.edit_message_text("🎉 Vamos começar um novo quiz! Escolha o tema...")
-        case 'meus_quizzes':
-            await query.edit_message_text("📁 Aqui estão seus quizzes salvos:")
-        case 'estatisticas':
-            await query.edit_message_text("📊 Estatísticas dos quizzes:")
-        case 'parar_quiz':
-            await query.edit_message_text("🛑 Quiz encerrado com sucesso.")
-
 # 🚀 Inicialização do bot
 if __name__ == "__main__":
-    import asyncio
-
-    # Corrige o loop de eventos no Windows
     if os.name == "nt":
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-    TOKEN = "8486546752:AAHCdjdhljy_71qxDKMc9YT0GK6nFDn7veM"  # ⚠️ Token real — revogue após testes
     app = ApplicationBuilder().token(TOKEN).build()
 
-    # Handlers principais
+    # 🧠 Handlers principais
     app.add_handler(MessageHandler(filters.TEXT & filters.ChatType.GROUPS, grupo_mencao_handler))
     app.add_handler(CallbackQueryHandler(callback_handler, pattern="^(novo_quiz|meus_quizzes|estatisticas|parar_quiz)$"))
     app.add_handler(CommandHandler("quiz", iniciar_fluxo_quiz))
     app.add_handler(MessageHandler(filters.TEXT & filters.ChatType.PRIVATE, tratar_resposta_quiz))
-    app.add_handler(CallbackQueryHandler(tratar_callback_quiz, pattern="^(qtd_|alt_|tempo_|dif_|confirmar_quiz)"))
+    app.add_handler(CallbackQueryHandler(tratar_callback_quiz, pattern="^(qtd_|alt_|tempo_|dif_|confirmar_quiz)$"))
+    app.add_handler(CallbackQueryHandler(iniciar_quiz_handler, pattern="^iniciar_quiz$"))  # ✅ Adicionado
 
     print("🤖 Bot rodando como Bot do AMIZADES...")
     app.run_polling()
-
