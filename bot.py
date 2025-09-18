@@ -53,13 +53,13 @@ if __name__ == "__main__":
 
     app = ApplicationBuilder().token(TOKEN).build()
 
-    # 🧠 Handlers principais
-    app.add_handler(MessageHandler(filters.TEXT & filters.ChatType.GROUPS, grupo_mencao_handler))
-    app.add_handler(CallbackQueryHandler(callback_handler, pattern="^(novo_quiz|meus_quizzes|estatisticas|parar_quiz)$"))
+    # 🧠 Handlers principais — ordem reorganizada
     app.add_handler(CommandHandler("quiz", iniciar_fluxo_quiz))
     app.add_handler(MessageHandler(filters.TEXT & filters.ChatType.PRIVATE, tratar_resposta_quiz))
     app.add_handler(CallbackQueryHandler(tratar_callback_quiz, pattern="^(qtd_|alt_|tempo_|dif_|confirmar_quiz)$"))
-    app.add_handler(CallbackQueryHandler(iniciar_quiz_handler, pattern="^iniciar_quiz$"))  # ✅ Adicionado
+    app.add_handler(CallbackQueryHandler(iniciar_quiz_handler, pattern="^iniciar_quiz$"))
+    app.add_handler(CallbackQueryHandler(callback_handler, pattern="^(novo_quiz|meus_quizzes|estatisticas|parar_quiz)$"))
+    app.add_handler(MessageHandler(filters.TEXT & filters.ChatType.GROUPS, grupo_mencao_handler))
 
     print("🤖 Bot rodando como Bot do AMIZADES...")
     app.run_polling()
