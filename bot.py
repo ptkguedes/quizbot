@@ -24,8 +24,8 @@ TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
 # 🔐 Lista de administradores autorizados (privado)
 ADMINS_AUTORIZADOS = [
-    7477496964,  # Patrick
-    5489033929   # Outro admin
+    7477496964,  # Jake
+    5489033929   # Maria
 ]
 
 # 🔍 Verifica se o usuário é admin no grupo
