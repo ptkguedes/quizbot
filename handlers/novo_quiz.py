@@ -1,5 +1,6 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
+from core.quiz_engine import gerar_quiz  # Certifique-se de que esse módulo existe
 
 # 🚀 Inicia o fluxo pedindo o tema
 async def iniciar_fluxo_quiz(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -45,7 +46,18 @@ async def tratar_callback_quiz(update: Update, context: ContextTypes.DEFAULT_TYP
 
     elif data == "confirmar_quiz":
         await query.edit_message_text("🧠 Gerando quiz com IA... Aguarde!")
-        # Aqui você pode chamar o quiz_engine para gerar as perguntas
+
+        dados = context.user_data
+        quiz = await gerar_quiz(
+            tema=dados['tema'],
+            qtd=dados['qtd'],
+            alternativas=dados['opcoes'],
+            dificuldade=dados['dificuldade']
+        )
+
+        context.user_data['quiz'] = quiz
+        await query.message.reply_text("✅ Quiz gerado com sucesso! Pronto para iniciar.")
+        # Aqui você pode adicionar botão "▶️ Iniciar Quiz"
 
 # 📊 Botões: número de perguntas
 async def enviar_opcoes_perguntas(update_or_query):
