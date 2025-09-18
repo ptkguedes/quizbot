@@ -9,12 +9,16 @@ from telegram.ext import (
     filters,
 )
 from handlers.menu import enviar_menu_privado, callback_handler
-from handlers.novo_quiz import iniciar_fluxo_quiz, tratar_resposta_quiz
-
+from handlers.novo_quiz import (
+    iniciar_fluxo_quiz,
+    tratar_resposta_quiz,
+    tratar_callback_quiz
+)
 
 # 🔐 Lista de administradores autorizados
 ADMINS_AUTORIZADOS = [
-    7477496964,5489033929 # IDs dos usuários autorizados
+    7477496964,  # Patrick
+    5489033929   # Outro admin
 ]
 
 # 🔍 Verifica se o usuário é admin no grupo
@@ -50,7 +54,7 @@ async def enviar_menu_privado(update: Update, context: ContextTypes.DEFAULT_TYPE
         reply_markup=reply_markup
     )
 
-# 🎮 Handler para os botões inline
+# 🎮 Handler para os botões do menu principal
 async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -63,16 +67,12 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     match query.data:
         case 'novo_quiz':
             await query.edit_message_text("🎉 Vamos começar um novo quiz! Escolha o tema...")
-            # Aqui entra a lógica de seleção de tema
         case 'meus_quizzes':
             await query.edit_message_text("📁 Aqui estão seus quizzes salvos:")
-            # Lógica para listar quizzes
         case 'estatisticas':
             await query.edit_message_text("📊 Estatísticas dos quizzes:")
-            # Lógica para mostrar estatísticas
         case 'parar_quiz':
             await query.edit_message_text("🛑 Quiz encerrado com sucesso.")
-            # Lógica para parar quiz
 
 # 🚀 Inicialização do bot
 if __name__ == "__main__":
@@ -85,11 +85,13 @@ if __name__ == "__main__":
     TOKEN = "8486546752:AAHCdjdhljy_71qxDKMc9YT0GK6nFDn7veM"  # ⚠️ Token real — revogue após testes
     app = ApplicationBuilder().token(TOKEN).build()
 
+    # Handlers principais
     app.add_handler(MessageHandler(filters.TEXT & filters.ChatType.GROUPS, grupo_mencao_handler))
-    app.add_handler(CallbackQueryHandler(callback_handler))
+    app.add_handler(CallbackQueryHandler(callback_handler, pattern="^(novo_quiz|meus_quizzes|estatisticas|parar_quiz)$"))
     app.add_handler(CommandHandler("quiz", iniciar_fluxo_quiz))
     app.add_handler(MessageHandler(filters.TEXT & filters.ChatType.PRIVATE, tratar_resposta_quiz))
-   
+    app.add_handler(CallbackQueryHandler(tratar_callback_quiz, pattern="^(qtd_|alt_|tempo_|dif_|confirmar_quiz)"))
+
     print("🤖 Bot rodando como Bot do AMIZADES...")
     app.run_polling()
 
