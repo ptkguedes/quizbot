@@ -8,11 +8,13 @@ from telegram.ext import (
     ContextTypes,
     filters,
 )
+from handlers.menu import enviar_menu_privado, callback_handler
+from handlers.novo_quiz import iniciar_fluxo_quiz, tratar_resposta_quiz
 
-# 🔐 Lista de administradores autorizados (definidos manualmente)
+
+# 🔐 Lista de administradores autorizados
 ADMINS_AUTORIZADOS = [
-    7477496964,  # Substitua com seu ID real
-    987654321,  # Outro admin
+    7477496964,5489033929 # IDs dos usuários autorizados
 ]
 
 # 🔍 Verifica se o usuário é admin no grupo
@@ -44,7 +46,7 @@ async def enviar_menu_privado(update: Update, context: ContextTypes.DEFAULT_TYPE
     reply_markup = InlineKeyboardMarkup(keyboard)
     await context.bot.send_message(
         chat_id=update.effective_user.id,
-        text="Olá, comandante do quiz! Escolha uma opção abaixo:",
+        text="Olá, querido usuário! Escolha uma opção abaixo para comandar seus quizzes:",
         reply_markup=reply_markup
     )
 
@@ -73,16 +75,21 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             # Lógica para parar quiz
 
 # 🚀 Inicialização do bot
-async def main():
-    TOKEN = os.getenv("BOT_TOKEN") or "SEU_TOKEN_AQUI"
+if __name__ == "__main__":
+    import asyncio
+
+    # Corrige o loop de eventos no Windows
+    if os.name == "nt":
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+    TOKEN = "8486546752:AAHCdjdhljy_71qxDKMc9YT0GK6nFDn7veM"  # ⚠️ Token real — revogue após testes
     app = ApplicationBuilder().token(TOKEN).build()
 
     app.add_handler(MessageHandler(filters.TEXT & filters.ChatType.GROUPS, grupo_mencao_handler))
     app.add_handler(CallbackQueryHandler(callback_handler))
+    app.add_handler(CommandHandler("quiz", iniciar_fluxo_quiz))
+    app.add_handler(MessageHandler(filters.TEXT & filters.ChatType.PRIVATE, tratar_resposta_quiz))
+   
+    print("🤖 Bot rodando como Bot do AMIZADES...")
+    app.run_polling()
 
-    print("🤖 Bot rodando...")
-    await app.run_polling()
-
-if __name__ == "__main__":
-    import asyncio
-    asyncio.run(main())
