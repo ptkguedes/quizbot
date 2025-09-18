@@ -4,9 +4,9 @@ from core.quiz_engine import gerar_quiz  # Certifique-se de que esse módulo exi
 
 # 🚀 Inicia o fluxo pedindo o tema
 async def iniciar_fluxo_quiz(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("🧠 Qual será o tema do quiz?")
     context.user_data.clear()
     context.user_data['etapa'] = 'tema'
+    await update.message.reply_text("🧠 Qual será o tema do quiz?")
 
 # 🧠 Trata respostas enviadas por texto (tema)
 async def tratar_resposta_quiz(update: Update, context: ContextTypes.DEFAULT_TYPE):
